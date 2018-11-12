@@ -9,7 +9,7 @@ class UnitHarvester extends base {
 		this.move_opts = {
 			visualizePathStyle: {
 				stroke: '#ff0000', 
-				lineStyle: 'undefined'
+				lineStyle: 'undefined',
 			}
 		};
 	}
@@ -17,30 +17,32 @@ class UnitHarvester extends base {
 		return 'HARVESTER';
 	}
 	valueOf() {
+		console.log('valueOf called');
 		return this.name;
 	}
 	create(spawn, src, force = false) {
-		let mods = [WORK, CARRY, MOVE];
+		let mods = [WORK, CARRY, MOVE];                  // 200
 		if (spawn.room.energyCapacityAvailable > 300) {
-			mods.push(WORK, CARRY, MOVE);
+			mods.push(CARRY, MOVE);                      // 300
 		}
 		if (spawn.room.energyCapacityAvailable > 500) {
-			mods.push(WORK, CARRY);
+			mods.push(WORK, MOVE, MOVE);                 // 500
 		}
 		if (spawn.room.energyCapacityAvailable > 700) {
-			mods.push(WORK, CARRY);
+			mods.push(CARRY, CARRY, CARRY, MOVE);        // 000
 		}
 		if (spawn.room.energyCapacityAvailable > 900) {
-			mods.push(WORK, CARRY, CARRY);
+			mods.push(WORK, WORK);
 		}
 
 		// Just incase everyone is dead and we don't have any energy...
 		let ex = spawn.memory.energy_history[0];
 		if (force || spawn.memory.energy_history.every(e => { return e === ex; })) {
+			console.log("Something wrong with harvesters, panic!");
 			mods = [WORK, CARRY, MOVE];
 		}
 
-		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('H_'), {memory: {role: this.name, sid: src.id}})) {
+		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('H_'), {memory: {role: this.name, sid: src}})) {
 			case ERR_NAME_EXISTS:
 				spawn.notice("Failed to spawn creep, name taken");
 				break;
@@ -73,7 +75,7 @@ class UnitHarvester extends base {
 				if (sources.length === 0) {
 					let target = creep.getTarget();
 					if (target) {
-						sources = [target]
+						sources = [target];
 					}
 				}
 				if (sources.length === 0) {

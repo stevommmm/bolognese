@@ -31,7 +31,7 @@ class UnitSoldier extends base {
 			mods.push(TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH);
 		}
 
-		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('S_'), {memory: {role: 'soldier'}})) {
+		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('S_'), {memory: {role: this.name}})) {
 			case ERR_NAME_EXISTS:
 				spawn.notice("Failed to spawn creep, name taken");
 				break;

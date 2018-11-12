@@ -29,9 +29,9 @@ class UnitBuilder extends base {
 			mods.push(WORK, CARRY, MOVE);
 		}
 		if (spawn.room.energyCapacityAvailable > 700) {
-			mods.push(WORK, WORK, CARRY, MOVE, MOVE);
+			mods.push(WORK, CARRY, MOVE);
 		}
-		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('B_'), {memory: {role: 'builder'}})) {
+		switch(spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('B_'), {memory: {role: this.name}})) {
 			case ERR_NAME_EXISTS:
 				spawn.notice("Failed to spawn creep, name taken");
 				break;
@@ -94,12 +94,8 @@ class UnitBuilder extends base {
 						break;
 				}
 				return;
-			}
-			else {
-				let idle = creep.room.find(FIND_FLAGS, {
-					filter: { name: 'idle'}
-				});
-				creep.cachedMoveTo(idle[0], this.move_opts);
+			} else {
+				creep.displayIdle();
 			}
 			break;
 		case 'building':
