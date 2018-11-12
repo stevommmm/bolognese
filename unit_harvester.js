@@ -85,12 +85,17 @@ class UnitHarvester extends base {
 					creep.suicide();
 					Memory.creeps[creep.name] = undefined;
 				}
-				switch(creep.harvest(sources[0])) {
+				let e = creep.harvest(sources[0]);
+				switch(e) {
 					case ERR_NOT_IN_RANGE:
 						creep.cachedMoveTo(sources[0], this.move_opts);
 						break;
+					case ERR_INVALID_TARGET:
+						creep.resetTarget();
 					case OK:
 						break;
+					default:
+						creep.log('Err; ' + e);
 				}
 				break;
 			case 'dumping':

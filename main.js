@@ -1,8 +1,8 @@
 
-const CPU_WARN         = 2;
-const TARGET_HARVESTER = 3;
-const TARGET_BUILDERS  = 4;
-const TARGET_SOLDIERS  = 2;
+const CPU_WARN          = 2;
+const TARGET_HARVESTERS = 5;
+const TARGET_BUILDERS   = 2;
+const TARGET_SOLDIERS   = 2;
 
 
 let util = require('util');
@@ -164,17 +164,17 @@ module.exports.loop = function () {
 	// Respawn creeps as needed.
 	for (let id of spawn.room.energy_sources()) {
 		let src_creeps = creepsBySrcId(id).length;
-		if (creepsBySrcId(id).length < TARGET_HARVESTER) {
+		if (creepsBySrcId(id).length < TARGET_HARVESTERS) {
 			roles.HARVESTER.create(spawn, id,  !count.HARVESTER || count.HARVESTER === 0);
 			// If we had less than the required creeps then return loop here
 			return;
 		}
 	}
-	if (!count.BUILDER || count.BUILDER < TARGET_BUILDER) {
+	if (!count.BUILDER || count.BUILDER < TARGET_BUILDERS) {
 		roles.BUILDER.create(spawn);
 		return;
 	}
-	if (!count.SOLDIER || count.SOLDIER < TARGET_SOLDIER) {
+	if (!count.SOLDIER || count.SOLDIER < TARGET_SOLDIERS) {
 		roles.SOLDIER.create(spawn);
 		return;
 	}

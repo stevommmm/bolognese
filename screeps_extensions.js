@@ -10,8 +10,8 @@ Room.prototype.energy_sources = function() {
 // -- Spawn --------------------------------------------------------------------
 
 StructureSpawn.prototype.notice = function(message) {
-	this.room.visual.text("❕ " + message, this.pos.x + 2, this.pos.y, 
-		{font: 0.6, opacity: 0.6, backgroundColor: '#20202f', align: 'left'});
+	this.room.visual.text("❕ " + message, this.pos.x + 1, this.pos.y, 
+		{font: '0.5 monospace', color: '#ffffff', opacity: 0.4, backgroundColor: '#20202f', align: 'left'});
 }
 
 StructureSpawn.prototype.hud = function() {
@@ -117,6 +117,13 @@ function positionCount(pos) {
 }
 
 Creep.prototype.cachedMoveTo = function(target, opts = {}) {
+	if (this.fatigue > 0) {
+		return ERR_TIRED;
+	}
+	if (samePos(this.pos, target.pos)) {
+		return OK;
+	}
+
 	if (!('ignoreCreeps' in opts)) {
 		opts['ignoreCreeps'] = true;
 	}
@@ -124,19 +131,29 @@ Creep.prototype.cachedMoveTo = function(target, opts = {}) {
 		opts['range'] = 1;
 	}
 	// If we're stick for >2 ticks, reset some things
-	if (samePos(this.memory.lastPos, this.pos) && positionCount(this.memory.lastPos) > 2) {
-		this.say("😵");
-		opts['ignoreCreeps'] = false;
-		opts['reusePath'] = 0;
+
+	let count = positionCount(this.memory.lastPos);
+	if (samePos(this.memory.lastPos, this.pos)) {
+		if (count++ > 3) {
+			this.say("😵");
+			opts['ignoreCreeps'] = false;
+			opts['reusePath'] = 1;
+		}
+	} else {
+		count = 0;
 	}
 
-	this.memory.lastPos = {x: this.pos.x, y: this.pos.y, roomName: this.pos.roomName, count: positionCount(this.memory.lastPos) + 1};
+	this.memory.lastPos = {x: this.pos.x, y: this.pos.y, roomName: this.pos.roomName, count: count};
 
-	this.moveTo(target, opts);
+	let ret = this.moveTo(target, opts);
+	if (ret !== 0) {
+		this.log(`Moveto generated error: ${ret}`);
+	}
+	return ret;
 }
 
 Creep.prototype.isNextTo = function(target) {
-	return this.pos.inRangeTo(this.pos.x, this.pos.y, target, 10);
+	return this.pos.inRangeTo(this.pos.x, this.pos.y, target, 3);
 }
 
 Creep.prototype.log = function(message) {
