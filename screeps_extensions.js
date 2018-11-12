@@ -100,13 +100,6 @@ Creep.prototype.findEnergyDeposit = function() {
 	}
 }
 
-Creep.prototype.displayState = function(state) {
-	this.room.visual.text(state, this.pos, {align: 'center', font: '0.4'});
-}
-Creep.prototype.displayIdle = function() {
-	this.displayState("😴");
-}
-
 // pathing helper
 function samePos(a, b) {
 	return a !== undefined 
@@ -131,13 +124,13 @@ Creep.prototype.cachedMoveTo = function(target, opts = {}) {
 		opts['range'] = 1;
 	}
 	// If we're stick for >2 ticks, reset some things
-	if (samePos(this.memory.lastPos, this.pos) && positionCount(this.memory.lastPost) > 2) {
+	if (samePos(this.memory.lastPos, this.pos) && positionCount(this.memory.lastPos) > 2) {
 		this.say("😵");
 		opts['ignoreCreeps'] = false;
 		opts['reusePath'] = 0;
 	}
 
-	this.memory.lastPos = {x: this.pos.x, y: this.pos.y, roomName: this.pos.roomName, count: positionCount(this.memory.lastPost) + 1};
+	this.memory.lastPos = {x: this.pos.x, y: this.pos.y, roomName: this.pos.roomName, count: positionCount(this.memory.lastPos) + 1};
 
 	this.moveTo(target, opts);
 }
@@ -148,6 +141,13 @@ Creep.prototype.isNextTo = function(target) {
 
 Creep.prototype.log = function(message) {
 	console.log(`[${this.name}]{${this.memory.state}}(${this.memory.target}) ${message}`);
+}
+
+Creep.prototype.displayState = function(state) {
+	this.room.visual.text(state, this.pos, {align: 'center', font: '0.4'});
+}
+Creep.prototype.displayIdle = function() {
+	this.displayState("💤");
 }
 
 Creep.prototype.getState = function() {

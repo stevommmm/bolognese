@@ -55,6 +55,7 @@ class UnitSoldier extends base {
 			filter: { color: COLOR_RED}
 		});
 		creep.cachedMoveTo(mons[0], this.move_opts);
+		creep.displayIdle();
 	}
 }
 
