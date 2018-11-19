@@ -18,6 +18,13 @@ class BuildQueue {
 	}
 }
 
+function unitCount() {
+	if (!Memory.unit_counts) {
+		Memory.unit_counts = _.countBy(Object.values(Game.creeps), 'memory.role');
+	}
+	return Memory.unit_counts;
+}
+
 function sortByCost(parts) {
 	return _.sortBy(parts, e => { return BODYPART_COST[e] })
 }
@@ -30,8 +37,18 @@ function bodyCost(body) {
 
 function isGoodEnough(structure) {
 	return structure.hits === undefined 
-		|| ((structure.hits/structure.hitsMax) * 100) > 50 
+		|| ((structure.hits/structure.hitsMax) * 100) > 60 
 		|| structure.hits > 10000
+}
+
+function energyInStructure(structure) {
+	if (structure.energy !== undefined) {
+		return structure.energy;
+	}
+	if (structure.store[RESOURCE_ENERGY] !== undefined) {
+		return structure.store[RESOURCE_ENERGY];
+	}
+	return 0;
 }
 
 class NameGenerator {
@@ -48,5 +65,7 @@ module.exports = {
 	isGoodEnough: isGoodEnough,
 	bodyCost: bodyCost,
 	sortByCost: sortByCost,
-	namer: new NameGenerator()
+	energyInStructure: energyInStructure,
+	namer: new NameGenerator(),
+	unitCount: unitCount
 }
