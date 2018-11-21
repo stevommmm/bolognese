@@ -9,13 +9,13 @@ class FRANK {
 	constructor() {
 		this.move_opts = {
 			visualizePathStyle: {
-				stroke: '#0000ff', 
+				stroke: '#0000ff',
 				lineStyle: 'undefined',
 			}
 		};
 	}
 	atCapacity(room) {
-		if (!room.storage) {
+		if (!room.storage && !room.container) {
 			return true;
 		}
 		if (!room.units[NAME]) {
@@ -56,7 +56,7 @@ class FRANK {
 	tick(creep) {
 		switch(creep.state) {
 			case 'harvesting':
-				let energy_source = creep.room.storage || creep.room.spawn;
+				let energy_source = creep.room.storage || creep.room.container || creep.room.spawn;
 				if(energy_source) {
 					switch(creep.withdraw(energy_source, RESOURCE_ENERGY)) {
 						case ERR_NOT_IN_RANGE:
@@ -71,7 +71,7 @@ class FRANK {
 				break;
 			case 'dumping':
 				let target = _.head(_.filter(
-					_.map(creep.room.deposits, Game.getObjectById), 
+					_.map(creep.room.deposits, Game.getObjectById),
 					e => { return e && e.energy < e.energyCapacity; }
 				));
 				if(target) {

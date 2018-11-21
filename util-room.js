@@ -48,9 +48,33 @@ function layoutBase(room) {
 	});
 }
 
+function usedCpu(func, name) {
+	let cpu = Game.cpu.getUsed();
+	func();
+	let used = Game.cpu.getUsed() - cpu;
+	console.log(`CPU ${name}, used ${used}`);
+}
+
 function tick(room) {
-	if (Game.cpu.bucket === 10000) {
+	if (Game.cpu.bucket === 10000 && Game.time % 100 === 0) {
 		layoutBase(room);
+	}
+
+	if (!room.spawn) {
+		return;
+	}
+	
+	for (let tower_id of room.towers) {
+		let tower = Game.getObjectById(tower_id);
+		let closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+		if(closestHostile) {
+			tower.attack(closestHostile);
+		}
+	}
+
+	if (!util_creep.roles['FRANK'].atCapacity(room)) {
+		util_creep.roles['FRANK'].create(room);
+		return;
 	}
 	if (!util_creep.roles['HARVESTER'].atCapacity(room)) {
 		util_creep.roles['HARVESTER'].create(room);
@@ -62,7 +86,6 @@ function tick(room) {
 			return;
 		}
 	}
-
 }
 
 module.exports = {

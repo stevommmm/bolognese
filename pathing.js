@@ -22,8 +22,8 @@ function interleave(x, y) {
 
 // pathing helper
 function samePos(a, b) {
-	return a !== undefined 
-	&& b !== undefined 
+	return a !== undefined
+	&& b !== undefined
 	&& a.x === b.x
 	&& a.y === b.y
 	&& a.roomName === b.roomName;
@@ -37,6 +37,13 @@ function setLastPos(creep, count) {
 	creep.memory.lastPos = {x: creep.pos.x, y: creep.pos.y, roomName: creep.pos.roomName, count: count};
 }
 
+function moveNear(creep, to, range) {
+	if (creep.pos.inRangeTo(to, range)) {
+		return;
+	}
+	moveTo(creep, to);
+}
+
 function moveTo(creep, to, opts = {}) {
 	if (samePos(creep.pos, to.pos)) {
 		return OK;
@@ -44,7 +51,7 @@ function moveTo(creep, to, opts = {}) {
 
 	let path = creep.memory._path;
 
-	// Work out of we're stuck for some reason - other creeps most likely
+	// Work out if we're stuck for some reason - other creeps most likely
 	let last_pos = getLastPos(creep);
 	let count = last_pos.count;
 	if (samePos(last_pos, creep.pos)) {
@@ -55,11 +62,11 @@ function moveTo(creep, to, opts = {}) {
 	setLastPos(creep, count);
 
 	if (!path || path.length === 0 || count > STUCK) {
-		creep.log(`Finding path from ${creep.pos.x},${creep.pos.y} to ${to.pos.x},${to.pos.y}. Stuck: ${count}.`);
+		creep.log(`Finding path from ${creep.pos.roomName},${creep.pos.x},${creep.pos.y} to ${to.pos.roomName},${to.pos.x},${to.pos.y}. Stuck: ${count}.`);
 		path = _.map(
 			creep.pos.findPathTo(to, {
-				'serialize': false, 
-				'ignoreCreeps': !(count > STUCK), 
+				'serialize': false,
+				'ignoreCreeps': !(count > STUCK),
 				'range': count > STUCK ? 1 : 0}),
 			'direction'
 		);
@@ -75,5 +82,6 @@ function moveTo(creep, to, opts = {}) {
 }
 
 module.exports = {
-	moveTo: moveTo
+	moveTo: moveTo,
+	moveNear: moveNear
 }

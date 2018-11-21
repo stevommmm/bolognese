@@ -14,3 +14,11 @@ Object.defineProperty(Creep.prototype, 'state', {
 	configurable: true,
 	enumerable: false,
 });
+
+Object.defineProperty(Creep.prototype, 'homeRoom', {
+	get: function() {
+		return this.memory._homeRoom;
+	},
+	configurable: true,
+	enumerable: false,
+});

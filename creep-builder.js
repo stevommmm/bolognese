@@ -1,6 +1,7 @@
 'use strict';
 
 let util = require('util');
+let pathing = require('pathing');
 
 const NAME = 'BUILDER';
 const UNITS_TARGET = 4;
@@ -9,7 +10,7 @@ class Builder {
 	constructor() {
 		this.move_opts = {
 			visualizePathStyle: {
-				stroke: '#ff0000', 
+				stroke: '#ff0000',
 				lineStyle: 'undefined',
 			}
 		};
@@ -36,7 +37,7 @@ class Builder {
 				console.log("Failed to spawn creep, name taken");
 				break;
 			case ERR_NOT_ENOUGH_ENERGY:
-				console.log(`Missing energy. ${room.energyAvailable}/${util.bodyCost(mods)}`);
+				console.log(`Missing energy for Builder. ${room.energyAvailable}/${util.bodyCost(mods)}`);
 				break;
 			case OK:
 				console.log("Spawning creep");
@@ -67,11 +68,11 @@ class Builder {
 	tick(creep) {
 		switch(creep.state) {
 			case 'harvesting':
-				let energy_source = creep.room.storage || creep.room.spawn;
+				let energy_source = Game.rooms[creep.homeRoom].storage || Game.rooms[creep.homeRoom].container || Game.rooms[creep.homeRoom].spawn;
 				if(energy_source) {
 					switch(creep.withdraw(energy_source, RESOURCE_ENERGY)) {
 						case ERR_NOT_IN_RANGE:
-							creep.moveTo(energy_source, this.move_opts);
+							pathing.moveTo(creep, energy_source, this.move_opts);
 							break;
 						case ERR_INVALID_TARGET:
 						case ERR_NOT_ENOUGH_RESOURCES:
@@ -82,8 +83,8 @@ class Builder {
 				break;
 			case 'building':
 				if (!creep.memory.target) {
-					let t = creep.room.build_queue.pop();
-					if (t) { 
+					let t = Game.rooms[creep.homeRoom].build_queue.pop();
+					if (t) {
 						creep.memory.target = t;
 						creep.log(`New Build target :${t}`);
 					}
@@ -94,7 +95,7 @@ class Builder {
 					if (target instanceof ConstructionSite) {
 						switch(creep.build(target)) {
 							case ERR_NOT_IN_RANGE:
-								creep.moveTo(target, this.move_opts);
+								pathing.moveTo(creep, target, this.move_opts);
 								break;
 							case OK:
 								break;
@@ -109,7 +110,7 @@ class Builder {
 					} else {
 						switch(creep.repair(target)) {
 							case ERR_NOT_IN_RANGE:
-								creep.moveTo(target, this.move_opts);
+								pathing.moveTo(creep, target, this.move_opts);
 								break;
 							case OK:
 								break;
@@ -128,8 +129,8 @@ class Builder {
 				}
 				break;
 			case 'upgrading':
-				if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-					creep.moveTo(creep.room.controller, this.move_opts);
+				if(creep.upgradeController(Game.rooms[creep.homeRoom].controller) == ERR_NOT_IN_RANGE) {
+					pathing.moveTo(creep, Game.rooms[creep.homeRoom].controller, this.move_opts);
 				}
 				break;
 		}

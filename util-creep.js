@@ -4,6 +4,7 @@ let roles = {
 	'FRANK': require('creep-frank'),
 	'HARVESTER': require('creep-harvester'),
 	'BUILDER': require('creep-builder'),
+	'SCOUT': require('creep-scout'),
 }
 
 function tick(creep) {
@@ -17,6 +18,9 @@ function tick(creep) {
 	if (!role) {
 		creep.log('unknown role...');
 	} else {
+		if (!creep.memory._homeRoom) {
+			creep.memory._homeRoom = creep.room.name;
+		}
 		role.pre_tick(creep);
 		role.tick(creep);
 		role.post_tick(creep);

@@ -1,6 +1,7 @@
 'use strict';
 
 let util = require('util');
+let pathing = require('pathing');
 
 const NAME = 'HARVESTER';
 const UNITS_PER_SRC = 3;
@@ -9,7 +10,7 @@ class Harvester {
 	constructor() {
 		this.move_opts = {
 			visualizePathStyle: {
-				stroke: '#00ff00', 
+				stroke: '#00ff00',
 				lineStyle: 'undefined',
 			}
 		};
@@ -18,7 +19,7 @@ class Harvester {
 		if (!room.units[NAME]) {
 			return false;
 		}
-		return room.units[NAME].length === (room.sources.length * UNITS_PER_SRC);
+		return room.units[NAME].length >= (room.sources.length * UNITS_PER_SRC);
 	}
 	create(room) {
 		let mods = [WORK, CARRY, MOVE];                  // 200
@@ -62,12 +63,12 @@ class Harvester {
 
 		if (!src) { return; }
 
-		switch(room.spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('H_'), {memory: {role: NAME, sid: src }})) {
+		switch(room.spawn.spawnCreep(util.sortByCost(mods), util.namer.gen('H_'), {memory: {role: NAME, sid: src, homeRoom: room.name }})) {
 			case ERR_NAME_EXISTS:
 				console.log("Failed to spawn creep, name taken");
 				break;
 			case ERR_NOT_ENOUGH_ENERGY:
-				console.log(`Missing energy. ${room.energyAvailable}/${util.bodyCost(mods)}`);
+				console.log(`Missing energy for Harvester. ${room.energyAvailable}/${util.bodyCost(mods)}`);
 				break;
 			case OK:
 				console.log("Spawning creep");
@@ -96,7 +97,7 @@ class Harvester {
 				let e = creep.harvest(source);
 				switch(e) {
 					case ERR_NOT_IN_RANGE:
-						creep.moveTo(source, this.move_opts);
+						pathing.moveTo(creep, source, this.move_opts);
 						break;
 					case OK:
 						break;
@@ -105,14 +106,17 @@ class Harvester {
 				}
 				break;
 			case 'dumping':
-				let target = _.head(_.filter(
-					_.map(creep.room.deposits, Game.getObjectById), 
-					e => { return e && e.energy < e.energyCapacity; }
-				));
+				let target = Game.rooms[creep.homeRoom].storage || Game.rooms[creep.homeRoom].container;
+				if (!target) {
+					target = _.head(_.filter(
+						_.map(Game.rooms[creep.homeRoom].deposits, Game.getObjectById),
+						e => { return e && e.energy < e.energyCapacity; }
+					));
+				}
 				if(target) {
 					switch(creep.transfer(target, RESOURCE_ENERGY)) {
 						case ERR_NOT_IN_RANGE:
-							creep.moveTo(target, this.move_opts);
+							pathing.moveTo(creep, target, this.move_opts);
 							break;
 						case OK:
 							break;

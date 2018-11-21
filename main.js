@@ -10,6 +10,7 @@ let util_creep = require('util-creep');
 
 module.exports.loop = function () {
 	console.log(JSON.stringify(Game.cpu));
+
 	for (let room of Object.values(Game.rooms)) {
 		util_room.tick(room);
 	}
